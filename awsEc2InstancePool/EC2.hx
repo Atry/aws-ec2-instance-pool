@@ -29,4 +29,9 @@
 
 package awsEc2InstancePool;
 
-typedef EC2 = Dynamic;
+typedef EC2 = {
+  function waitFor<Error, Data>(state:String, params:Dynamic, callaback:Error->Data->Void):Void;
+  function startInstances<Error, Data>(params:Dynamic, callaback:Error->Data->Void):Void;
+  function stopInstances<Error, Data>(params:Dynamic, callaback:Error->Data->Void):Void;
+  function runInstances<Error, Data>(params:Dynamic, callaback:Error->Data->Void):Void;
+};
