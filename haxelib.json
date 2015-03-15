@@ -1,0 +1,14 @@
+{
+  "name": "aws-ec2-instance-pool",
+  "license": "BSD",
+  "tags": [],
+  "description": "",
+  "contributors": [],
+  "releasenote": "Initial version.",
+  "version": "0.1.0",
+  "url": "https://github.com/Atry/aws-ec2-instance-pool.git",
+  "dependencies": {
+    "continuation": "",
+    "polygonal-ds": ""
+  }
+}

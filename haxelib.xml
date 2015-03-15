@@ -1,6 +1,0 @@
-<project name='aws-ec2-instance-pool' url='https://github.com/Atry/aws-ec2-instance-pool.git' license='BSD'>
-  <description></description>
-  <version name='0.1.0'>Initial version.</version>
-  <depends name="continuation"/>
-  <depends name="polygonal-ds"/>
-</project>
