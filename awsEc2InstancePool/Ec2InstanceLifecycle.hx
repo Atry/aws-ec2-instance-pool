@@ -162,7 +162,6 @@ class Ec2InstanceLifecycle
   }
 
   function busy(instance:InstanceInformation, numPendingTask:Int) {
-    trace('busy(instance = $instance, numPendingTask = $numPendingTask)');
     acquire = function (task) {
       numPendingTask++;
       task(instance.PublicDnsName);
