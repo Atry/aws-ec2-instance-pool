@@ -2,6 +2,12 @@
 
 **aws-ec2-instance-pool** is a cross-platform [Haxe](http://haxe.org/) library that manages AWS EC2 instances' lifecycles on demand.
 
+## Installation
+
+```
+haxelib install aws-ec2-instance-pool
+```
+
 ## Usage
 
 ### Creating a `Ec2InstancePool`
