@@ -34,9 +34,9 @@ var ec2InstanceOptions = {
 };
 var maxWorkloads = 5;
 
-var pool = new Ec2InstancePool(
+var pool = new awsEc2InstancePool.Ec2InstancePool(
   function() {
-    return new Ec2InstanceLifecycle(
+    return new awsEc2InstancePool.Ec2InstanceLifecycle(
       ec2,
       retryInterval,
       idleTimeout,
