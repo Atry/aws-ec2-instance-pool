@@ -76,7 +76,7 @@ class Ec2InstanceLifecycle
   function retry<Error, Data>(operation:(Error->Data->Void)->Void):Data {
     var error, result = @await operation();
     if (error != null) {
-      trace('Error calling an AWS API: $error, will retry in $retryInterval milliseconds.');
+      trace('Failed to call an AWS API: $error, will retry in $retryInterval milliseconds.');
       @await sleep(retryInterval);
       return @await retry(operation);
     } else {
