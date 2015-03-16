@@ -38,6 +38,9 @@ private typedef InstanceInformation = {
   InstanceId: String,
 }
 
+/**
+ * The handle to a EC2 instance.
+ */
 @:build(com.dongxiguo.continuation.Continuation.cpsByMeta(":async"))
 class Ec2InstanceLifecycle
 {
@@ -50,7 +53,7 @@ class Ec2InstanceLifecycle
 
   var terminationTimeout:Int;
 
-  var ec2InstanceConfiguration:Dynamic;
+  var ec2InstanceOptions:Dynamic;
 
   @:allow(awsEc2InstancePool)
   var acquire(default, null):(String->Void)->Void;
@@ -58,13 +61,22 @@ class Ec2InstanceLifecycle
   @:allow(awsEc2InstancePool)
   var release(default, null):Void->Void;
 
-  public function new(ec2:EC2, retryInterval:Int, idleTimeout:Int, terminationTimeout:Int, ec2InstanceConfiguration:Dynamic)
+  /**
+   * Create a `Ec2InstanceLifecycle`
+   *
+   * @param ec2 The `AWS.EC2` service.
+   * @param retryInterval The retry interval after a failed EC2 operation.
+   * @param idleTimeout Duration before a idle instance stopping, in milliseconds.
+   * @param terminationTimeout Duration before a stopped instance terminating, in milliseconds.
+   * @param ec2InstanceOptions The options to create a EC2 instance.
+   */
+  public function new(ec2:EC2, retryInterval:Int, idleTimeout:Int, terminationTimeout:Int, ec2InstanceOptions:Dynamic)
   {
     this.ec2 = ec2;
     this.retryInterval = retryInterval;
     this.idleTimeout = idleTimeout;
     this.terminationTimeout = terminationTimeout;
-    this.ec2InstanceConfiguration = ec2InstanceConfiguration;
+    this.ec2InstanceOptions = ec2InstanceOptions;
     terminated();
   }
 
@@ -99,7 +111,7 @@ class Ec2InstanceLifecycle
   @:async
   function createInstance():InstanceInformation {
     trace("debug", "Createing a new EC2 instance...");
-    var id = (@await retry(ec2.runInstances.bind(ec2InstanceConfiguration))).Instances[0].InstanceId;
+    var id = (@await retry(ec2.runInstances.bind(ec2InstanceOptions))).Instances[0].InstanceId;
     trace("debug", 'EC2 instance $id is created, now booting...');
     var data = @await retry(ec2.waitFor.bind("instanceRunning", { InstanceIds: [id] } ));
     var runningInstance = data.Reservations[0].Instances[0];

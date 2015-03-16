@@ -30,6 +30,9 @@
 package awsEc2InstancePool;
 import com.dongxiguo.continuation.utils.Tuple.pair;
 
+/**
+ * An AWS EC2 instance pool
+ */
 @:build(com.dongxiguo.continuation.Continuation.cpsByMeta(":async"))
 class Ec2InstancePool
 {
@@ -37,11 +40,21 @@ class Ec2InstancePool
   var instanceLifecycleFactory:Void->Ec2InstanceLifecycle;
   var scheduler:Scheduler;
 
+  /**
+   * Create a new EC2 instance pool
+   * @param instanceLifecycleFactory The factory function to create an EC2 instance.
+   * @param maxTasksPerInstance Max concurrency `acquire` per EC2 instance.
+   */
   public function new(instanceLifecycleFactory:Void->Ec2InstanceLifecycle, maxTasksPerInstance:Int) {
     this.instanceLifecycleFactory = instanceLifecycleFactory;
     this.scheduler = new Scheduler(maxTasksPerInstance);
   }
 
+  /**
+   * Returns an EC2 instance before using it.
+   *
+   * @return A pair consist with the EC2 instance index and the public host name of the EC2 instance.
+   */
   @:async
   public function acquire() {
     // Acquire a idle EC2 instance index
@@ -61,6 +74,10 @@ class Ec2InstancePool
     return @await pair(instanceIndex, instanceHostName);
   }
 
+  /**
+   * Give back an EC2 instance after using it.
+   * @param instanceIndex The EC2 instance index returns from `acquire`.
+   */
   public function release(instanceIndex:Int):Void {
     // Release the instance
     instanceLifecycles[instanceIndex].release();
