@@ -72,7 +72,7 @@ class Ec2InstanceLifecycle
   function retry<Error, Data>(operation:(Error->Data->Void)->Void):Data {
     var error, result = @await operation();
     if (error != null) {
-      trace('Failed to call an AWS API: $error, will retry in $retryInterval milliseconds.');
+      trace("warn", 'Failed to call an AWS API: $error, will retry in $retryInterval milliseconds.');
       @await sleep(retryInterval);
       return @await retry(operation);
     } else {
@@ -82,39 +82,39 @@ class Ec2InstanceLifecycle
 
   @:async
   function stopInstance(id:String):Void {
-    trace('Stopping EC2 instance $id...');
+    trace("debug", 'Stopping EC2 instance $id...');
     @await retry(ec2.stopInstances.bind({InstanceIds: [id]}));
     @await retry(ec2.waitFor.bind("instanceStopped", {InstanceIds: [id]}));
-    trace('EC2 instance $id is stopped now.');
+    trace("debug", 'EC2 instance $id is stopped now.');
   }
 
   @:async
   function terminateInstance(id:String):Void {
-    trace('Terminating EC2 instance $id...');
+    trace("debug", 'Terminating EC2 instance $id...');
     @await retry(ec2.terminateInstances.bind({InstanceIds: [id]}));
     @await retry(ec2.waitFor.bind("instanceTerminated", {InstanceIds: [id]}));
-    trace('EC2 instance $id is terminated now.');
+    trace("debug", 'EC2 instance $id is terminated now.');
   }
 
   @:async
   function createInstance():InstanceInformation {
-    trace("Createing a new EC2 instance...");
+    trace("debug", "Createing a new EC2 instance...");
     var id = (@await retry(ec2.runInstances.bind(ec2InstanceConfiguration))).Instances[0].InstanceId;
-    trace('EC2 instance $id is created, now booting...');
+    trace("debug", 'EC2 instance $id is created, now booting...');
     var data = @await retry(ec2.waitFor.bind("instanceRunning", { InstanceIds: [id] } ));
     var runningInstance = data.Reservations[0].Instances[0];
-    trace('EC2 instance $id is running now.');
+    trace("debug", 'EC2 instance $id is running now.');
     return runningInstance;
   }
 
   @:async
   function resumeInstance(id:String):InstanceInformation {
-    trace("Resuming EC2 instance $id...");
+    trace("debug", "Resuming EC2 instance $id...");
     @await retry(ec2.startInstances.bind({InstanceIds: [id]}));
-    trace('EC2 instance $id is booting...');
+    trace("debug", 'EC2 instance $id is booting...');
     var data = @await retry(ec2.waitFor.bind("instanceRunning", { InstanceIds: [id] } ));
     var runningInstance = data.Reservations[0].Instances[0];
-    trace('EC2 instance $id is running now.');
+    trace("debug", 'EC2 instance $id is running now.');
     return runningInstance;
   }
 
