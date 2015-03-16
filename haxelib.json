@@ -1,9 +1,9 @@
 {
   "name": "aws-ec2-instance-pool",
   "license": "BSD",
-  "tags": [],
-  "description": "",
-  "contributors": [],
+  "tags": [ "cross", "js", "nodejs", "amazon", "aws" ],
+  "description": "AWS EC2 instance pool",
+  "contributors": [ "Atry" ],
   "releasenote": "Initial version.",
   "version": "0.1.0",
   "url": "https://github.com/Atry/aws-ec2-instance-pool.git",
