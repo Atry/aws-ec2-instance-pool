@@ -48,6 +48,8 @@ class Ec2InstanceLifecycle
 
   var idleTimeout:Int;
 
+  var terminationTimeout:Int;
+
   var ec2InstanceConfiguration:Dynamic;
 
   @:allow(awsEc2InstancePool)
@@ -56,20 +58,14 @@ class Ec2InstanceLifecycle
   @:allow(awsEc2InstancePool)
   var release(default, null):Void->Void;
 
-  public function new(ec2:EC2, retryInterval:Int, idleTimeout:Int, ec2InstanceConfiguration:Dynamic)
+  public function new(ec2:EC2, retryInterval:Int, idleTimeout:Int, terminationTimeout:Int, ec2InstanceConfiguration:Dynamic)
   {
     this.ec2 = ec2;
     this.retryInterval = retryInterval;
     this.idleTimeout = idleTimeout;
+    this.terminationTimeout = terminationTimeout;
     this.ec2InstanceConfiguration = ec2InstanceConfiguration;
-
-    // Start an instance when the first task comes
-    acquire = function(firstTask) {
-      creating([firstTask]);
-    }
-    release = function() {
-      throw "Unable to release a instance before started.";
-    };
+    terminated();
   }
 
   @:async
@@ -90,6 +86,14 @@ class Ec2InstanceLifecycle
     @await retry(ec2.stopInstances.bind({InstanceIds: [id]}));
     @await retry(ec2.waitFor.bind("instanceStopped", {InstanceIds: [id]}));
     trace('EC2 instance $id is stopped now.');
+  }
+
+  @:async
+  function terminateInstance(id:String):Void {
+    trace('Terminating EC2 instance $id...');
+    @await retry(ec2.terminateInstances.bind({InstanceIds: [id]}));
+    @await retry(ec2.waitFor.bind("instanceTerminated", {InstanceIds: [id]}));
+    trace('EC2 instance $id is terminated now.');
   }
 
   @:async
@@ -124,8 +128,26 @@ class Ec2InstanceLifecycle
     });
   }
 
+  function terminating(instanceId:String, tasks:Array<String->Void>) {
+    acquire = tasks.push;
+    release = function() {
+      throw "Unable to release a instance when it is suspending.";
+    };
+    terminateInstance(instanceId, function() {
+      if (tasks.length > 0) {
+        creating(tasks);
+      } else {
+        terminated();
+      }
+    });
+  }
+
   function suspended(instanceId:String) {
+    var timer = Timer.delay(function() {
+      terminating(instanceId, []);
+    }, terminationTimeout);
     acquire = function(task) {
+      timer.stop();
       resuming(instanceId, [task]);
     };
     release = function() {
@@ -204,4 +226,13 @@ class Ec2InstanceLifecycle
     });
   }
 
+  function terminated() {
+    // Start an instance when the first task comes
+    acquire = function(firstTask) {
+      creating([firstTask]);
+    }
+    release = function() {
+      throw "Unable to release a instance before started.";
+    };
+  }
 }
