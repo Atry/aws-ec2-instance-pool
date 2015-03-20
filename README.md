@@ -18,7 +18,7 @@ haxelib install aws-ec2-instance-pool
   var AWS = js.Node.require("aws-sdk");
   var ec2:awsEc2InstancePool.EC2 = Type.createInstance(AWS.EC2, [{}]);
 #else
-  // You need to adopt AWS SDK to awsEc2InstancePool.EC2,
+  // You need to adapt AWS SDK to awsEc2InstancePool.EC2,
   // if you are on a platform other than JavaScript.
   var ec2:awsEc2InstancePool.EC2 = new YourOwnAwsEc2ApiImplementation();
 #end
